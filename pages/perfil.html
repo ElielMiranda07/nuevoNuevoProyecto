@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="../styles/perfil.css" />
+  </head>
+  <body>
+    <header class="conteiner-fluid p-0 d-flex align-items-center">
+      <article
+        class="container-fluid d-flex flex-row justify-content-between align-items-center"
+      >
+        <div class="mx-2">
+          <img src="../media/logo.png" alt="" />
+        </div>
+      </article>
+    </header>
+    <main>
+      <section class="section1">
+        <article>
+          <form action="" class="d-flex flex-column col-6" id="infoDePerfil">
+            <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm"
+                >Empresa</span
+              >
+              <input
+                type="text"
+                class="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-sm"
+                id="perfilEmpresa"
+                value=""
+              />
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm"
+                >Nombre y Apellido</span
+              >
+              <input
+                type="text"
+                class="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-sm"
+                id="perfilName"
+                value=""
+              />
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm"
+                >Mail</span
+              >
+              <input
+                type="text"
+                class="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-sm"
+                id="perfilMail"
+                value=""
+                disabled
+              />
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm"
+                >Número de Teléfono</span
+              >
+              <input
+                type="text"
+                class="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-sm"
+                id="perfilNumeroTelefono"
+                value=""
+              />
+            </div>
+
+            <!-- Contenedor para mostrar la imagen de perfil actual -->
+            <div class="mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm"
+                >Imagen Actual</span
+              >
+              <img
+                src=""
+                alt="Imagen de Perfil"
+                id="imagenPerfil"
+                class="img-thumbnail mt-2"
+                style="max-width: 200px; max-height: 200px"
+              />
+            </div>
+
+            <div class="input-group input-group-sm mb-3">
+              <span class="input-group-text" id="inputGroup-sizing-sm"
+                >Imagen Nueva</span
+              >
+              <input
+                type="file"
+                class="form-control"
+                aria-label="Sizing example input"
+                aria-describedby="inputGroup-sizing-sm"
+                id="perfilImagen"
+                accept="image/*"
+              />
+            </div>
+            <button class="btn btn-primary" id="actualizarPerfil">
+              Actualizar perfil
+            </button>
+          </form>
+        </article>
+        <article>
+          <form class="d-flex flex-column col-6" id="crearPublicacion">
+            <!-- Selección de Nombre a Mostrar -->
+            <div class="mb-4">
+              <h4>Elegir el nombre a mostrar</h4>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="checkboxNombre"
+                  name="nombreMostrar"
+                />
+                <label
+                  class="form-check-label"
+                  for="checkboxNombre"
+                  id="labelNombre"
+                >
+                  Nombre y Apellido
+                </label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="checkboxEmpresa"
+                  name="nombreMostrar"
+                />
+                <label
+                  class="form-check-label"
+                  for="checkboxEmpresa"
+                  id="labelEmpresa"
+                >
+                  Empresa
+                </label>
+              </div>
+            </div>
+
+            <!-- Selección de Categorías -->
+            <div class="input-group mb-3">
+              <label class="input-group-text" for="categoriaSelect"
+                >Categorías</label
+              >
+              <select class="form-select" id="categoriaSelect" required>
+                <option value="">Selecciona una categoría</option>
+                <!-- Opciones dinámicas desde Firestore -->
+              </select>
+            </div>
+
+            <!-- Selección de Subcategorías -->
+            <div class="input-group mb-3">
+              <label class="input-group-text" for="subcategoriaSelect"
+                >SubCategorías</label
+              >
+              <select class="form-select" id="subcategoriaSelect" required>
+                <option value="">Selecciona una subcategoría</option>
+                <!-- Opciones dinámicas desde Firestore -->
+              </select>
+            </div>
+
+            <!-- Descripción de la Publicación -->
+            <div class="mb-3">
+              <label for="descripcion" class="form-label">Descripción</label>
+              <textarea
+                class="form-control"
+                id="descripcion"
+                rows="3"
+                required
+              ></textarea>
+            </div>
+
+            <!-- Botón para Enviar la Publicación -->
+            <button
+              type="submit"
+              class="btn btn-primary"
+              id="crearPublicacionBtn"
+            >
+              Cargar nueva publicación
+            </button>
+          </form>
+        </article>
+      </section>
+    </main>
+    <footer></footer>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <script src="../js/perfil.js"></script>
+  </body>
+</html>

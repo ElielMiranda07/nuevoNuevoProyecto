@@ -1,0 +1,15 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+header {
+  background-color: bisque;
+  height: 14vh;
+}
+
+.section1 {
+  background-color: aqua;
+  height: 86vh;
+}
