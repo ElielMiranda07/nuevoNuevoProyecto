@@ -1,0 +1,199 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* General Styles */
+body {
+  font-family: "Arial", sans-serif;
+}
+
+.logo-header {
+  width: 150px;
+}
+
+/* Sección 1 */
+.section1 {
+  background-color: #f9f9f9;
+}
+
+.section2 {
+  background-color: #ffffff;
+}
+
+footer {
+  background-color: #333;
+  color: #fff;
+}
+
+h5,
+h6 {
+  font-weight: bold;
+}
+
+p {
+  color: #666;
+}
+
+/* Category Buttons */
+.categoria-boton {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background-color: transparent;
+  border: 2px solid #333; /* Cambio de color del borde */
+  color: #333; /* Cambio de color del texto/icono */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease-in-out;
+}
+
+.categoria-boton:hover,
+.subcategoria-boton:hover {
+  background-color: #333;
+  color: #fff;
+  border: 2px solid black;
+}
+
+.categoria-boton.active {
+  background-color: #555;
+  color: #fff;
+  border: 2px solid black;
+}
+
+/* Subcategory Buttons */
+.subcategoria-boton {
+  padding: 0.5rem 1rem;
+  border-radius: 50px; /* Botones pill-shaped */
+  border: 2px solid #555;
+  background-color: transparent;
+  color: #555;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  transition: all 0.3s ease-in-out;
+}
+
+.subcategoria-boton.active {
+  background-color: #555;
+  color: #fff;
+}
+
+.subcategoria-boton:hover {
+  background-color: #555;
+  color: #fff;
+}
+
+/* Cards for Publicaciones */
+.card {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: none;
+  transition: all 0.3s ease-in-out;
+}
+
+.card:hover {
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.card-text {
+  color: #777;
+}
+
+.card-img-top {
+  height: 200px;
+  object-fit: cover;
+}
+
+/* Grid Layout for Publicaciones */
+#contenedorPublicaciones .card {
+  width: 100%; /* Asegura que la tarjeta ocupe todo el ancho de la columna */
+}
+
+/* Adjust container margins */
+.container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+/* Button Customizations */
+.btn-primary {
+  background-color: #333;
+  border-color: #333;
+}
+
+.btn-primary:hover {
+  background-color: #555;
+  border-color: #555;
+}
+
+.btn-outline-light {
+  color: #fff;
+  border-color: #fff;
+}
+
+.btn-outline-light:hover {
+  background-color: #fff;
+  color: #333;
+}
+
+.btn-light {
+  background-color: #f5f5f5;
+  color: #333;
+  border-color: #ddd;
+}
+
+.btn-light:hover {
+  background-color: #e2e2e2;
+  color: #333;
+}
+
+.calificaciones {
+  display: flex; /* Utiliza flexbox para alinear las estrellas */
+}
+
+.star {
+  position: relative; /* Permite la superposición */
+  display: inline-block; /* Alinea horizontalmente las estrellas */
+  font-size: 1.5rem; /* Tamaño de las estrellas */
+  margin-right: 2px; /* Espaciado uniforme entre estrellas */
+  overflow: hidden; /* Oculta el contenido que excede el contenedor */
+  height: 1.5rem; /* Asegura que todas las estrellas tengan la misma altura */
+  line-height: 1.5rem; /* Alinea verticalmente el contenido */
+}
+
+.star-filled {
+  color: gold; /* Color dorado para las estrellas llenas */
+}
+
+.star-inner {
+  position: absolute; /* Permite que la estrella llena se superponga */
+  top: 0; /* Alinea a la parte superior del contenedor */
+  left: 0; /* Alinea a la izquierda del contenedor */
+  height: 100%; /* Hace que la estrella llena ocupe toda la altura del contenedor */
+  white-space: nowrap; /* Evita que el contenido se desborde */
+  color: gold; /* Color dorado para las estrellas llenas */
+  z-index: 10; /* Asegura que la estrella llena esté en la parte superior */
+}
+
+.star-empty {
+  color: #ccc; /* Color de estrella vacía */
+}
+
+/* Responsive Adjustments */
+@media (max-width: 767.98px) {
+  .categoria-boton {
+    width: 60px;
+    height: 60px;
+  }
+
+  .subcategoria-boton {
+    font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+  }
+}

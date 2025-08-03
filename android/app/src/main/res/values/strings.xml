@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">nuevoNuevoProyecto</string>
+    <string name="title_activity_main">nuevoNuevoProyecto</string>
+    <string name="package_name">com.nuevoNuevoProyecto.capacitor</string>
+    <string name="custom_url_scheme">com.nuevoNuevoProyecto.capacitor</string>
+</resources>

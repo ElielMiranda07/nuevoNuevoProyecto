@@ -116,30 +116,38 @@ const btnRegistrarse = document.getElementById("btnRegistrarse");
 // Verificar el estado de autenticación cuando la página carga
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    // El usuario está autenticado, eliminar el botón de "Registrarse" y mostrar el perfil
-    console.log("Usuario autenticado: ", user.displayName);
-    btnIniciarSesion.textContent = "Cerrar sesión";
+    const uid = user.uid;
 
-    // Eliminar el contenido del contenedor del botón de "Registrarse"
-    if (btnRegistrarse) {
-      btnRegistrarse.innerHTML = ""; // Limpiar el contenido existente
+    const userRef = db.collection("usuarios").doc(uid);
 
-      // Crear el ícono de perfil y el nombre del usuario
-      const perfilHTML = `
-        <a href="../pages/perfil.html" id="miPerfil" class="d-flex align-items-center">
-          <iconify-icon icon="iconamoon:profile-fill"></iconify-icon>
-          <span class="ms-2">${user.displayName}</span>
-        </a>
-      `;
+    userRef.get().then((doc) => {
+      if (doc.exists) {
+        const userData = doc.data();
 
-      // Insertar el ícono y nombre del usuario en el contenedor
-      btnRegistrarse.innerHTML = perfilHTML;
-    }
-  } else {
-    // No hay usuario autenticado, mostrar el botón de "Registrarse"
-    console.log("No hay usuario autenticado.");
-    btnIniciarSesion.textContent = "Iniciar sesión";
-    mostrarBotonRegistrarse(); // Volver a mostrar el botón de "Registrarse"
+        btnIniciarSesion.textContent = "Cerrar sesión";
+
+        // Eliminar el contenido del contenedor del botón de "Registrarse"
+        if (btnRegistrarse) {
+          btnRegistrarse.innerHTML = ""; // Limpiar el contenido existente
+
+          // Crear el ícono de perfil y el nombre del usuario
+          const perfilHTML = `
+              <a href="../pages/perfil.html" id="miPerfil" class="d-flex align-items-center">
+                <iconify-icon icon="iconamoon:profile-fill"></iconify-icon>
+                <span class="ms-2">${userData.name}</span>
+              </a>
+              `;
+
+          // Insertar el ícono y nombre del usuario en el contenedor
+          btnRegistrarse.innerHTML = perfilHTML;
+        }
+      } else {
+        // No hay usuario autenticado, mostrar el botón de "Registrarse"
+        console.log("No hay usuario autenticado.");
+        btnIniciarSesion.textContent = "Iniciar sesión";
+        mostrarBotonRegistrarse(); // Volver a mostrar el botón de "Registrarse"
+      }
+    });
   }
 });
 
@@ -201,80 +209,6 @@ btnIniciarSesion.addEventListener("click", () => {
 // Referencia al contenedor de categorías
 const contenedorCategorias = document.getElementById("contenedorCategorias");
 
-// Función para traer la colección "categorias" y generar el HTML
-function cargarCategorias() {
-  db.collection("categorias")
-    .get()
-    .then((querySnapshot) => {
-      querySnapshot.forEach((doc) => {
-        // Obtener los datos del documento
-        const data = doc.data();
-        const nombre = data.nombre;
-        const icono = data.icono; // Asumiendo que tienes un campo 'icono' en el documento
-        const id = doc.id; // Usar el id del documento para acceder a la subcolección
-
-        // Crear la plantilla HTML
-        const categoriaHTML = `
-          <div class="d-flex flex-column justify-content-center categoria">
-            <button class="categoria-boton" data-id="${id}">
-              <iconify-icon icon="${icono}"></iconify-icon>
-            </button>
-            <h6>${nombre}</h6>
-          </div>
-        `;
-
-        // Insertar la plantilla en el contenedor
-        contenedorCategorias.innerHTML += categoriaHTML;
-      });
-
-      // Agregar event listeners a los botones de categoría después de que se cargue el HTML
-      const botonesCategoria = document.querySelectorAll(".categoria-boton");
-      botonesCategoria.forEach((boton) => {
-        boton.addEventListener("click", (event) => {
-          const categoriaId = event.currentTarget.getAttribute("data-id");
-          cargarSubcategorias(categoriaId);
-        });
-      });
-    })
-    .catch((error) => {
-      console.error("Error al traer las categorías: ", error);
-    });
-}
-
-// Función para cargar las subcategorías de una categoría específica
-function cargarSubcategorias(categoriaId) {
-  // Referencia a la subcolección de subcategorías dentro del documento de la categoría
-  db.collection("categorias")
-    .doc(categoriaId)
-    .collection("subcategorias")
-    .get()
-    .then((querySnapshot) => {
-      // Limpiar el contenedor de subcategorías antes de agregar nuevas
-      const contenedorSubcategorias = document.getElementById(
-        "contenedorSubcategorias"
-      );
-      contenedorSubcategorias.innerHTML = "";
-
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const nombreSubcategoria = data.nombre; // Ajustar según los campos de Firestore
-
-        // Crear la plantilla HTML para las subcategorías
-        const subcategoriaHTML = `
-          <div class="subcategoria-item">
-            <p>${nombreSubcategoria}</p>
-          </div>
-        `;
-
-        // Insertar la subcategoría en el contenedor
-        contenedorSubcategorias.innerHTML += subcategoriaHTML;
-      });
-    })
-    .catch((error) => {
-      console.error("Error al traer las subcategorías: ", error);
-    });
-}
-
 // Llamar a la función para cargar las categorías al cargar la página
 cargarCategorias();
 
@@ -291,6 +225,7 @@ const contenedorPublicaciones = document.getElementById(
 // Variables para almacenar el filtro actual
 let filtroCategoriaID = null;
 let filtroSubcategoriaID = null;
+let filtroCodigoPostal = null;
 
 // Función para manejar errores y mostrar mensajes al usuario
 function manejarError(error, mensajeUsuario, contenedor) {
@@ -307,7 +242,7 @@ async function cargarCategorias() {
   try {
     contenedorCategorias.innerHTML = `
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Cargando categorías...</span>
+        <span class="visualmente-hidden">Cargando categorías...</span>
       </div>
     `;
 
@@ -349,16 +284,22 @@ async function cargarCategorias() {
         filtroCategoriaID = categoriaId;
         filtroSubcategoriaID = null; // Resetear subcategoría al cambiar de categoría
 
+        // Obtener el código postal desde el input
+        const codigoPostal = parseInt(
+          document.getElementById("inputCodigoPostal").value.trim(),
+          10
+        );
+
         // Mostrar un estado de carga en publicaciones
         contenedorPublicaciones.innerHTML = `
           <div class="spinner-border text-success" role="status">
-            <span class="visually-hidden">Cargando publicaciones...</span>
+            <span class="visualmente-hidden">Cargando publicaciones...</span>
           </div>
         `;
 
         // Cargar subcategorías y publicaciones correspondientes
         await cargarSubcategorias(categoriaId);
-        await cargarPublicaciones(categoriaId, null); // Cargar solo por categoría
+        await cargarPublicaciones(categoriaId, null, codigoPostal); // Cargar por categoría y código postal
 
         // Opcional: Resaltar la categoría seleccionada
         botonesCategoria.forEach((btn) => btn.classList.remove("active"));
@@ -419,15 +360,27 @@ async function cargarSubcategorias(categoriaId) {
         // Actualizar los filtros
         filtroSubcategoriaID = subcategoriaId;
 
+        // Obtener el código postal desde el input
+        const codigoPostal = parseInt(
+          document.getElementById("inputCodigoPostal").value.trim(),
+          10
+        );
+
+        filtroCodigoPostal = codigoPostal;
+
         // Mostrar un estado de carga en publicaciones
         contenedorPublicaciones.innerHTML = `
           <div class="spinner-border text-success" role="status">
-            <span class="visually-hidden">Cargando publicaciones...</span>
+            <span class="visualmente-hidden">Cargando publicaciones...</span>
           </div>
         `;
 
-        // Cargar publicaciones filtradas por categoría y subcategoría
-        await cargarPublicaciones(filtroCategoriaID, subcategoriaId);
+        // Cargar publicaciones filtradas por categoría, subcategoría y código postal
+        await cargarPublicaciones(
+          filtroCategoriaID,
+          subcategoriaId,
+          codigoPostal
+        );
 
         // Opcional: Resaltar la subcategoría seleccionada
         botonesSubcategoria.forEach((btn) => btn.classList.remove("active"));
@@ -443,25 +396,32 @@ async function cargarSubcategorias(categoriaId) {
   }
 }
 
-// Función para calcular el promedio de calificaciones
+// Función para calcular el promedio de calificaciones donde "mostrar" es true
 async function obtenerPromedioCalificaciones(publicacionId) {
   try {
     const calificacionesSnapshot = await db
       .collection("publicaciones")
       .doc(publicacionId)
       .collection("calificaciones")
+      .where("mostrar", "==", true) // Filtrar solo las calificaciones donde "mostrar" es true
       .get();
 
     if (calificacionesSnapshot.empty) {
-      return 0; // Sin calificaciones
+      return 0; // Sin calificaciones que mostrar
     }
 
     let suma = 0;
+    let contador = 0;
+
     calificacionesSnapshot.forEach((doc) => {
-      suma += doc.data().puntaje; // Usar 'puntaje' en lugar de 'rating'
+      const calificacion = doc.data();
+      if (calificacion.puntaje) {
+        suma += calificacion.puntaje; // Sumar el puntaje de cada calificación
+        contador++;
+      }
     });
 
-    const promedio = suma / calificacionesSnapshot.size;
+    const promedio = suma / contador; // Calcular el promedio solo con las calificaciones válidas
     return promedio;
   } catch (error) {
     console.error("Error al obtener calificaciones:", error);
@@ -495,13 +455,64 @@ function generarEstrellas(promedio) {
   return estrellas.join("");
 }
 
+const codigoPostal = parseInt(
+  document.getElementById("inputCodigoPostal").value.trim(),
+  10
+);
+
+async function obtenerTotalPublicaciones(
+  categoriaId,
+  subcategoriaId,
+  codigoPostal
+) {
+  let publicacionesRef = db
+    .collection("publicaciones")
+    .where("categoriaID", "==", categoriaId);
+
+  // Filtrar por subcategoría si está presente
+  if (subcategoriaId) {
+    publicacionesRef = publicacionesRef.where(
+      "subcategoriaID",
+      "==",
+      subcategoriaId
+    );
+  }
+
+  // Filtrar por código postal si está presente
+  if (codigoPostal) {
+    publicacionesRef = publicacionesRef.where(
+      "codigosPostales",
+      "array-contains-any",
+      [codigoPostal]
+    );
+  }
+
+  // Obtener el total de publicaciones que coinciden con el filtro
+  const totalQuerySnapshot = await publicacionesRef.get();
+  return totalQuerySnapshot.size; // Devuelve el número total de publicaciones
+}
+
 // Variable global para el ID de la publicación actual
 let idPublicacionActual = null;
 
 // Función para cargar y mostrar las publicaciones filtradas con calificaciones
-async function cargarPublicaciones(categoriaId, subcategoriaId) {
+let lastVisible = null; // Último documento visible para la paginación
+let currentPage = 1; // Página actual
+const pageSize = 8; // Número de publicaciones por página
+
+async function cargarPublicaciones(
+  categoriaId,
+  subcategoriaId,
+  codigoPostal,
+  isNextPage = false
+) {
   try {
-    // Construir la consulta
+    const totalResultados = await obtenerTotalPublicaciones(
+      categoriaId,
+      subcategoriaId,
+      codigoPostal
+    ); // Obtener el total de publicaciones
+
     let publicacionesRef = db
       .collection("publicaciones")
       .where("categoriaID", "==", categoriaId);
@@ -514,24 +525,47 @@ async function cargarPublicaciones(categoriaId, subcategoriaId) {
       );
     }
 
-    // Realizar la consulta y ordenar por timestamp descendente
-    const querySnapshot = await publicacionesRef
-      .orderBy("timestamp", "desc")
-      .get();
+    if (codigoPostal) {
+      publicacionesRef = publicacionesRef.where(
+        "codigosPostales",
+        "array-contains-any",
+        [codigoPostal]
+      );
+    }
+
+    // Ordenar primero por 'premium' (true primero), luego por 'timestamp'
+    publicacionesRef = publicacionesRef
+      .orderBy("premium", "desc") // 'true' antes de 'false'
+      .orderBy("timestamp", "desc");
+
+    if (isNextPage && lastVisible) {
+      publicacionesRef = publicacionesRef.startAfter(lastVisible);
+      currentPage++;
+    }
+
+    publicacionesRef = publicacionesRef.limit(pageSize);
+
+    const querySnapshot = await publicacionesRef.get();
 
     const contenedorPublicaciones = document.getElementById(
       "contenedorPublicaciones"
     );
-    contenedorPublicaciones.innerHTML = ""; // Limpiar el contenedor
+    contenedorPublicaciones.innerHTML = "";
 
     if (querySnapshot.empty) {
-      contenedorPublicaciones.innerHTML =
-        "<p>No se encontraron publicaciones.</p>";
+      if (!isNextPage) {
+        contenedorPublicaciones.innerHTML =
+          "<p>No se encontraron publicaciones.</p>";
+      }
       return;
     }
 
-    // Crear un array de promesas para procesar las publicaciones
-    const publicacionesPromises = querySnapshot.docs.map(async (doc) => {
+    lastVisible = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+    let publicacionesHTML = "";
+    let index = 0; // Contador para el índice de las publicaciones
+
+    for (const doc of querySnapshot.docs) {
       const publicacion = doc.data();
       const descripcion = publicacion.descripcion || "Sin descripción.";
       const imagenURL = publicacion.imagenURL || "";
@@ -540,51 +574,58 @@ async function cargarPublicaciones(categoriaId, subcategoriaId) {
       const timestamp = publicacion.timestamp
         ? publicacion.timestamp.toDate().toLocaleString()
         : "Sin fecha";
+      let telefonoWhatsapp = numeroTelefono.replace(/\D/g, "");
 
-      // Obtener el promedio de calificaciones
       const promedioCalificaciones = await obtenerPromedioCalificaciones(
         doc.id
       );
       const estrellasHTML = generarEstrellas(promedioCalificaciones);
 
-      // Crear una tarjeta para la publicación con las estrellas
       const publicacionHTML = `
         <div class="col-md-4 mb-4">
           <div class="card h-100" data-id="${doc.id}" style="cursor: pointer;">
-            ${
-              imagenURL
-                ? `<img src="${imagenURL}" class="card-img-top" alt="Imagen de la publicación">`
-                : ""
-            }
             <div class="card-body">
+              <img src="${imagenURL}" class="card-img-top" alt="Imagen de la publicación">
               <h5 class="card-title">${nombreMostrar}</h5>
               <p class="card-text">${descripcion}</p>
-              <p class="card-text"><small class="text-muted">Teléfono: ${numeroTelefono}</small></p>
+              <p class="card-text"><small class="text-muted">Teléfono: ${numeroTelefono}</small>
+              <div><a href="https://wa.me/549${telefonoWhatsapp}?text=Hola, vengo de nuevoNuevoProyecto" target="blank">
+              <iconify-icon icon="logos:whatsapp-icon" width="40" height="40"></iconify-icon></a></div></p>
               <p class="card-text"><small class="text-muted">Publicado el: ${timestamp}</small></p>
               <div class="calificaciones">
                 ${estrellasHTML} (${promedioCalificaciones.toFixed(1)})
               </div>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
+      // Insertar la "card" de publicidad en la quinta posición (índice 4)
+      if (index === 4) {
+        const publicidadHTML = `
+          <div class="col-md-4 mb-4">
+            <div class="card h-100 publicidad-card">
+              <div class="card-body">
+                <h5 class="card-title">Publicidad</h5>
+                <p class="card-text">Aquí podría ir tu publicidad.</p>
+              </div>
+            </div>
+          </div>`;
+        publicacionesHTML += publicidadHTML; // Insertar publicidad
+      }
 
-      return publicacionHTML;
-    });
+      publicacionesHTML += publicacionHTML; // Agregar la publicación al HTML
+      index++; // Incrementar el índice
+    }
 
-    // Esperar a que todas las promesas se resuelvan
-    const publicacionesHTML = await Promise.all(publicacionesPromises);
+    contenedorPublicaciones.innerHTML += publicacionesHTML;
 
-    // Agregar todas las publicaciones al contenedor
-    contenedorPublicaciones.innerHTML = publicacionesHTML.join("");
-
-    // Agregar eventos de click a las tarjetas para abrir el modal
     document.querySelectorAll(".card").forEach((card) => {
       card.addEventListener("click", () => {
         const id = card.getAttribute("data-id");
         mostrarModalPublicacion(id);
       });
     });
+
+    mostrarBotonesDePaginacion(totalResultados); // Pasar el total de publicaciones a la función de paginación
   } catch (error) {
     manejarError(
       error,
@@ -593,6 +634,58 @@ async function cargarPublicaciones(categoriaId, subcategoriaId) {
     );
   }
 }
+
+// Función para insertar un HTML en una posición específica
+function insertarEnPosicion(htmlOriginal, nuevoHTML, posicion) {
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = htmlOriginal;
+
+  const publicaciones = Array.from(tempDiv.children);
+  publicaciones.splice(posicion - 1, 0, nuevoHTML); // Insertar el nuevo HTML en la posición dada
+
+  return publicaciones.map((el) => el.outerHTML).join(""); // Devolver el HTML completo
+}
+
+function mostrarBotonesDePaginacion(totalResultados) {
+  const nextButton = document.getElementById("botonSiguiente");
+  const prevButton = document.getElementById("botonAnterior");
+
+  // Verifica si los botones existen antes de intentar acceder a sus propiedades
+  if (nextButton) {
+    // Mostrar el botón "Siguiente" si hay más resultados que mostrar
+    if (lastVisible && totalResultados > currentPage * pageSize) {
+      nextButton.style.display = "block";
+    } else {
+      nextButton.style.display = "none";
+    }
+  }
+
+  if (prevButton) {
+    // Mostrar el botón "Anterior" si no estamos en la primera página
+    if (currentPage > 1) {
+      prevButton.style.display = "block";
+    } else {
+      prevButton.style.display = "none";
+    }
+  }
+}
+
+document.getElementById("botonSiguiente").addEventListener("click", () => {
+  cargarPublicaciones(
+    filtroCategoriaID,
+    filtroSubcategoriaID,
+    codigoPostal,
+    true
+  ); // true para cargar la siguiente página
+});
+
+document.getElementById("botonAnterior").addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    lastVisible = null;
+    cargarPublicaciones(filtroCategoriaID, filtroSubcategoriaID, codigoPostal);
+  }
+});
 
 // Función para mostrar el modal con los datos de la publicación
 async function mostrarModalPublicacion(id) {
@@ -662,7 +755,6 @@ function verificarAutenticacion() {
   }
 }
 
-// Función para guardar la calificación
 async function guardarCalificacion() {
   const descripcion = document
     .getElementById("descripcionCalificacion")
@@ -688,10 +780,15 @@ async function guardarCalificacion() {
     return;
   }
 
+  // Determinar el valor del campo 'mostrar' en función del puntaje
+  const mostrar = puntaje >= 3; // Será true si el puntaje es 3, 4 o 5, y false si es 1 o 2
+
+  // Crear el objeto de calificación con el campo 'mostrar'
   const calificacion = {
     IDUsuario: user.uid,
     descripcion: descripcion,
     puntaje: puntaje,
+    mostrar: mostrar, // Agregar el campo 'mostrar'
     timestamp: firebase.firestore.FieldValue.serverTimestamp(),
   };
 
@@ -704,6 +801,7 @@ async function guardarCalificacion() {
       .add(calificacion);
 
     alert("Calificación enviada con éxito.");
+
     // Limpiar el formulario
     document.getElementById("descripcionCalificacion").value = "";
     document.getElementById("puntajeCalificacion").value = "";
@@ -733,15 +831,18 @@ document.addEventListener("DOMContentLoaded", () => {
 // Función para cargar y mostrar las calificaciones individuales en el modalListaCalificaciones
 async function cargarCalificacionesIndividuales(publicacionId) {
   try {
+    const listaCalificaciones = document.getElementById("listaCalificaciones");
+
+    // Limpiar el contenedor antes de agregar nuevas calificaciones
+    listaCalificaciones.innerHTML = "";
+
     const calificacionesSnapshot = await db
       .collection("publicaciones")
       .doc(publicacionId)
       .collection("calificaciones")
+      .where("mostrar", "==", true)
       .orderBy("timestamp", "desc")
       .get();
-
-    const listaCalificaciones = document.getElementById("listaCalificaciones");
-    listaCalificaciones.innerHTML = ""; // Limpiar el contenedor
 
     if (calificacionesSnapshot.empty) {
       listaCalificaciones.innerHTML = "<p>No hay calificaciones aún.</p>";
@@ -765,8 +866,6 @@ async function cargarCalificacionesIndividuales(publicacionId) {
         if (usuarioDoc.exists) {
           const usuarioData = usuarioDoc.data();
           nombreUsuario = usuarioData.name || "Anónimo";
-        } else {
-          console.log("No se encontró el usuario con el ID:", userId);
         }
       } catch (error) {
         console.error("Error al obtener el usuario desde Firestore:", error);
@@ -810,4 +909,40 @@ function configurarClickCalificaciones() {
       modalListaCalificaciones.show();
     }
   });
+}
+
+// Detectar el cierre del modal de calificaciones
+const modalListaCalificaciones = document.getElementById(
+  "modalListaCalificaciones"
+);
+modalListaCalificaciones.addEventListener("hidden.bs.modal", function () {
+  const listaCalificaciones = document.getElementById("listaCalificaciones");
+  listaCalificaciones.innerHTML = ""; // Limpiar el contenido del modal
+});
+
+// Función para configurar el click en las calificaciones (evitar duplicación)
+function configurarClickCalificaciones() {
+  const contenedorCalificaciones = document.getElementById(
+    "modalCalificaciones"
+  );
+
+  // Eliminar posibles listeners anteriores
+  contenedorCalificaciones.removeEventListener(
+    "click",
+    handleCalificacionesClick
+  );
+
+  // Añadir el listener una vez
+  contenedorCalificaciones.addEventListener("click", handleCalificacionesClick);
+}
+
+// Función manejadora para el evento
+function handleCalificacionesClick() {
+  if (idPublicacionActual) {
+    cargarCalificacionesIndividuales(idPublicacionActual);
+    const modalListaCalificaciones = new bootstrap.Modal(
+      document.getElementById("modalListaCalificaciones")
+    );
+    modalListaCalificaciones.show();
+  }
 }

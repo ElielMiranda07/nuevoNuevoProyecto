@@ -58,17 +58,24 @@
 
     <!-- Main Content -->
     <main>
+      <div class="container-fluid d-flex justify-content-center my-2">
+        <input
+          type="text"
+          id="inputCodigoPostal"
+          placeholder="Ingresá tu código postal"
+        />
+      </div>
       <!-- Sección de Categorías y Subcategorías -->
       <section class="section1 container d-flex align-items-center py-5">
         <article class="container d-flex flex-column text-center">
           <!-- Contenedor de Categorías -->
           <div
-            class="d-flex flex-wrap justify-content-center gap-3"
+            class="d-flex flex-row justify-content-center gap-3"
             id="contenedorCategorias"
           ></div>
           <!-- Contenedor de Subcategorías -->
           <div
-            class="d-flex flex-wrap justify-content-center gap-3 mt-3"
+            class="d-flex flex-row justify-content-center gap-3 mt-3"
             id="contenedorSubcategorias"
           ></div>
         </article>
@@ -77,6 +84,10 @@
       <!-- Sección de Publicaciones -->
       <section class="section2 container py-4">
         <div class="row" id="contenedorPublicaciones"></div>
+        <div id="paginacion">
+          <button id="botonAnterior" style="display: none">Anterior</button>
+          <button id="botonSiguiente" style="display: none">Siguiente</button>
+        </div>
       </section>
       <!-- Modal -->
       <div
